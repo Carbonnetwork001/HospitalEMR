@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in — Records</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+    :root{
+      --bg:#F6F5F1; --paper:#FDFCFA; --ink:#1C2321; --accent:#2F5D50;
+      --accent-light:#EEF3F1; --accent-border:#C9D6D0;
+      --border:#DAD6CC; --row-border:#E7E4DB; --muted:#6B6455; --faint:#9C9686;
+      --alert-bg:#FBF0EE; --alert-border:#EBD2CC; --alert:#A23B2E;
+      --warn-bg:#F7ECD9; --warn:#8A6414; --tab-idle:#EDEBE3;
+    }
+    *{box-sizing:border-box;}
+    body{margin:0;font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink);}
+    a{color:inherit;}
+    .serif{font-family:'Source Serif 4',serif;}
+    .mono{font-family:'IBM Plex Mono',monospace;}
+    .wrap{max-width:1080px;margin:0 auto;padding:0 20px;}
+    .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--border);background:var(--paper);}
+    .brand{display:flex;align-items:center;gap:8px;font-size:19px;font-weight:600;text-decoration:none;color:var(--ink);}
+    .brand svg{flex-shrink:0;}
+    .input{font-family:'IBM Plex Sans',sans-serif;background:var(--paper);border:1px solid var(--border);border-radius:4px;padding:9px 12px;font-size:13.5px;color:var(--ink);outline:none;width:100%;}
+    .input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(47,93,80,0.12);}
+    .input::placeholder{color:var(--faint);}
+    label.field-label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;}
+    .btn{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:500;padding:9px 16px;border-radius:6px;border:1px solid transparent;cursor:pointer;text-decoration:none;}
+    .btn-primary{background:var(--accent);color:var(--paper);}
+    .btn-primary:disabled{background:#B9C4BF;cursor:not-allowed;}
+    .btn-secondary{background:var(--accent-light);color:var(--accent);border-color:var(--accent-border);}
+    .btn-ghost{background:transparent;color:var(--muted);border-color:var(--border);}
+    .search-box{position:relative;}
+    .search-box svg{position:absolute;left:10px;top:11px;}
+    .search-box input{padding-left:32px;width:260px;}
+    .row{border-bottom:1px solid var(--row-border);}
+    .row:last-child{border-bottom:none;}
+    .patient-link{display:flex;align-items:center;gap:12px;padding:14px 16px;text-decoration:none;color:var(--ink);}
+    .patient-link:hover{background:var(--accent-light);}
+    .avatar{width:36px;height:36px;border-radius:50%;background:var(--border);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;}
+    .badge{font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:4px;display:inline-block;}
+    .badge-severe{background:#F5E4E1;color:var(--alert);}
+    .badge-moderate{background:var(--warn-bg);color:var(--warn);}
+    .badge-mild{background:var(--tab-idle);color:var(--muted);}
+    .badge-active{background:var(--accent-light);color:var(--accent);}
+    .badge-inactive{background:var(--tab-idle);color:#8A8574;}
+    .empty{padding:32px 0;text-align:center;font-size:13.5px;color:var(--faint);}
+    .banner{margin:16px 0 20px;border-radius:6px;padding:10px 14px;display:flex;gap:8px;align-items:flex-start;font-size:13px;}
+    .banner-alert{background:var(--alert-bg);border:1px solid var(--alert-border);}
+    .banner-ok{background:var(--accent-light);border:1px solid var(--accent-border);}
+    .tabs{display:flex;margin-bottom:-1px;flex-wrap:wrap;}
+    .tab{position:relative;padding:8px 16px 9px;border:1px solid var(--border);border-bottom:none;border-radius:6px 6px 0 0;background:var(--tab-idle);color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;margin-right:2px;}
+    .tab:hover{background:#F1EFE8;color:var(--ink);}
+    .tab.active{background:var(--paper);color:var(--accent);font-weight:600;z-index:1;}
+    .tab-panel{border:1px solid var(--border);background:var(--paper);padding:20px;min-height:280px;border-radius:0 6px 6px 6px;}
+    table{width:100%;border-collapse:collapse;}
+    th{text-align:left;font-size:11.5px;color:var(--faint);font-weight:400;padding-bottom:8px;}
+    td{padding:9px 0;font-size:13px;}
+    .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:24px;}
+    .stat-card{border:1px solid var(--row-border);border-radius:6px;padding:12px 14px;}
+    .stat-value{font-size:22px;font-weight:700;}
+    .stat-label{font-size:12px;color:var(--muted);margin-top:2px;}
+    .icon-btn{background:none;border:none;cursor:pointer;padding:2px;display:inline-flex;}
+    .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+    .section-title{display:flex;align-items:center;gap:8px;font-size:17px;font-weight:600;}
+    .inline-form{padding:16px;margin-bottom:16px;border-radius:6px;background:#FBFAF7;border:1px solid var(--border);}
+    .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;}
+    .form-actions{display:flex;gap:8px;margin-top:14px;}
+    .center-page{min-height:100vh;display:flex;align-items:center;justify-content:center;}
+    .card{background:var(--paper);border:1px solid var(--border);border-radius:10px;padding:32px;width:380px;max-width:90vw;}
+    .save-note{padding:8px 24px;font-size:12px;background:var(--alert-bg);color:var(--alert);border-top:1px solid var(--alert-border);}
+    ::-webkit-scrollbar{width:8px;}
+    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+    @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important;}}
+    .lock-icon{margin-bottom:18px;}
+    .subtitle{font-size:13.5px;color:var(--muted);margin:4px 0 24px;}
+    .field{margin-bottom:14px;}
+    .demo-note{margin-top:18px;font-size:12px;color:var(--faint);text-align:center;line-height:1.5;}
+</style>
+</head>
+<body>
+  <div class="center-page">
+    <div class="card">
+      <div class="lock-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2F5D50" stroke-width="1.8"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+      </div>
+      <h1 class="serif" style="font-size:22px;font-weight:700;margin:0;">Records</h1>
+      <p class="subtitle">Sign in to view and manage patient charts.</p>
+      <form id="loginForm">
+        <div class="field">
+          <label class="field-label" for="staffId">Staff ID</label>
+          <input class="input" id="staffId" placeholder="e.g. josei" required>
+        </div>
+        <div class="field">
+          <label class="field-label" for="password">Password</label>
+          <input class="input" id="password" type="password" placeholder="••••••••" required>
+        </div>
+        <button class="btn btn-primary" type="submit" style="width:100%;justify-content:center;margin-top:6px;">Sign in</button>
+      </form>
+      <p class="demo-note">This is a demo login screen — it accepts any credentials and does not check them against a real directory yet.</p>
+    </div>
+  </div>
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      window.location.href = 'patient-list.html';
+    });
+  </script>
+</body>
+</html>

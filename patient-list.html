@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Patients — Records</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+    :root{
+      --bg:#F6F5F1; --paper:#FDFCFA; --ink:#1C2321; --accent:#2F5D50;
+      --accent-light:#EEF3F1; --accent-border:#C9D6D0;
+      --border:#DAD6CC; --row-border:#E7E4DB; --muted:#6B6455; --faint:#9C9686;
+      --alert-bg:#FBF0EE; --alert-border:#EBD2CC; --alert:#A23B2E;
+      --warn-bg:#F7ECD9; --warn:#8A6414; --tab-idle:#EDEBE3;
+    }
+    *{box-sizing:border-box;}
+    body{margin:0;font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink);}
+    a{color:inherit;}
+    .serif{font-family:'Source Serif 4',serif;}
+    .mono{font-family:'IBM Plex Mono',monospace;}
+    .wrap{max-width:1080px;margin:0 auto;padding:0 20px;}
+    .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--border);background:var(--paper);}
+    .brand{display:flex;align-items:center;gap:8px;font-size:19px;font-weight:600;text-decoration:none;color:var(--ink);}
+    .brand svg{flex-shrink:0;}
+    .input{font-family:'IBM Plex Sans',sans-serif;background:var(--paper);border:1px solid var(--border);border-radius:4px;padding:9px 12px;font-size:13.5px;color:var(--ink);outline:none;width:100%;}
+    .input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(47,93,80,0.12);}
+    .input::placeholder{color:var(--faint);}
+    label.field-label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;}
+    .btn{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:500;padding:9px 16px;border-radius:6px;border:1px solid transparent;cursor:pointer;text-decoration:none;}
+    .btn-primary{background:var(--accent);color:var(--paper);}
+    .btn-primary:disabled{background:#B9C4BF;cursor:not-allowed;}
+    .btn-secondary{background:var(--accent-light);color:var(--accent);border-color:var(--accent-border);}
+    .btn-ghost{background:transparent;color:var(--muted);border-color:var(--border);}
+    .search-box{position:relative;}
+    .search-box svg{position:absolute;left:10px;top:11px;}
+    .search-box input{padding-left:32px;width:260px;}
+    .row{border-bottom:1px solid var(--row-border);}
+    .row:last-child{border-bottom:none;}
+    .patient-link{display:flex;align-items:center;gap:12px;padding:14px 16px;text-decoration:none;color:var(--ink);}
+    .patient-link:hover{background:var(--accent-light);}
+    .avatar{width:36px;height:36px;border-radius:50%;background:var(--border);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;}
+    .badge{font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:4px;display:inline-block;}
+    .badge-severe{background:#F5E4E1;color:var(--alert);}
+    .badge-moderate{background:var(--warn-bg);color:var(--warn);}
+    .badge-mild{background:var(--tab-idle);color:var(--muted);}
+    .badge-active{background:var(--accent-light);color:var(--accent);}
+    .badge-inactive{background:var(--tab-idle);color:#8A8574;}
+    .empty{padding:32px 0;text-align:center;font-size:13.5px;color:var(--faint);}
+    .banner{margin:16px 0 20px;border-radius:6px;padding:10px 14px;display:flex;gap:8px;align-items:flex-start;font-size:13px;}
+    .banner-alert{background:var(--alert-bg);border:1px solid var(--alert-border);}
+    .banner-ok{background:var(--accent-light);border:1px solid var(--accent-border);}
+    .tabs{display:flex;margin-bottom:-1px;flex-wrap:wrap;}
+    .tab{position:relative;padding:8px 16px 9px;border:1px solid var(--border);border-bottom:none;border-radius:6px 6px 0 0;background:var(--tab-idle);color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;margin-right:2px;}
+    .tab:hover{background:#F1EFE8;color:var(--ink);}
+    .tab.active{background:var(--paper);color:var(--accent);font-weight:600;z-index:1;}
+    .tab-panel{border:1px solid var(--border);background:var(--paper);padding:20px;min-height:280px;border-radius:0 6px 6px 6px;}
+    table{width:100%;border-collapse:collapse;}
+    th{text-align:left;font-size:11.5px;color:var(--faint);font-weight:400;padding-bottom:8px;}
+    td{padding:9px 0;font-size:13px;}
+    .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:24px;}
+    .stat-card{border:1px solid var(--row-border);border-radius:6px;padding:12px 14px;}
+    .stat-value{font-size:22px;font-weight:700;}
+    .stat-label{font-size:12px;color:var(--muted);margin-top:2px;}
+    .icon-btn{background:none;border:none;cursor:pointer;padding:2px;display:inline-flex;}
+    .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+    .section-title{display:flex;align-items:center;gap:8px;font-size:17px;font-weight:600;}
+    .inline-form{padding:16px;margin-bottom:16px;border-radius:6px;background:#FBFAF7;border:1px solid var(--border);}
+    .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;}
+    .form-actions{display:flex;gap:8px;margin-top:14px;}
+    .center-page{min-height:100vh;display:flex;align-items:center;justify-content:center;}
+    .card{background:var(--paper);border:1px solid var(--border);border-radius:10px;padding:32px;width:380px;max-width:90vw;}
+    .save-note{padding:8px 24px;font-size:12px;background:var(--alert-bg);color:var(--alert);border-top:1px solid var(--alert-border);}
+    ::-webkit-scrollbar{width:8px;}
+    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+    @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important;}}
+    .list-wrap{max-width:720px;margin:0 auto;padding:28px 20px;}
+    .list-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px;}
+    .list-container{background:var(--paper);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <a class="brand" href="patient-list.html">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2F5D50" stroke-width="1.8"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/></svg>
+      Records
+    </a>
+    <a class="btn btn-ghost" href="login.html" style="font-size:12.5px;">Sign out</a>
+  </div>
+
+  <div class="list-wrap">
+    <div class="list-head">
+      <h1 class="serif" style="font-size:24px;font-weight:700;margin:0;">Patients</h1>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <div class="search-box">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9C9686" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input class="input" id="searchBox" placeholder="Search name or MRN">
+        </div>
+        <a class="btn btn-primary" href="new-patient.html">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+          New patient
+        </a>
+      </div>
+    </div>
+    <div class="list-container" id="listContainer">
+      <div class="empty">Loading records…</div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'emr-patients-v1';
+
+    function seedPatients(){
+      return [
+        { id:"p1", name:"Anna Kovač", dob:"1988-04-12", sex:"Female", mrn:"00482", phone:"(555) 019-2231", bloodType:"O+",
+          allergies:[{id:"a1",substance:"Penicillin",severity:"Severe",reaction:"Anaphylaxis"}],
+          problems:["Type 2 diabetes","Hypertension"],
+          medications:[
+            {id:"m1",name:"Metformin",dosage:"500mg",frequency:"Twice daily",started:"2023-02-10",status:"Active"},
+            {id:"m2",name:"Lisinopril",dosage:"10mg",frequency:"Once daily",started:"2023-06-01",status:"Active"}],
+          visits:[
+            {id:"v1",date:"2026-08-14",type:"Follow-up",provider:"Dr. Osei",reason:"Diabetes management review",notes:"A1c improved to 6.9%. Continue current regimen, recheck in 3 months."},
+            {id:"v2",date:"2026-03-02",type:"Annual physical",provider:"Dr. Osei",reason:"Routine exam",notes:"No new concerns. Updated vaccination record."}],
+          labs:[
+            {id:"l1",date:"2026-08-14",test:"Hemoglobin A1c",result:"6.9",unit:"%",refRange:"4.0–5.6",flag:"High"},
+            {id:"l2",date:"2026-08-14",test:"LDL Cholesterol",result:"98",unit:"mg/dL",refRange:"<100",flag:"Normal"}],
+          vitals:[{id:"vi1",date:"2026-08-14",bp:"128/82",hr:"76",temp:"98.4",rr:"16",spo2:"98",weight:"165",height:"65"}]
+        },
+        { id:"p2", name:"Marcus Webb", dob:"1975-11-30", sex:"Male", mrn:"00317", phone:"(555) 442-8810", bloodType:"A-",
+          allergies:[], problems:["Seasonal allergic rhinitis"],
+          medications:[{id:"m3",name:"Cetirizine",dosage:"10mg",frequency:"Once daily, as needed",started:"2025-04-01",status:"Active"}],
+          visits:[{id:"v3",date:"2026-05-20",type:"Sick visit",provider:"Dr. Álvarez",reason:"Nasal congestion, sneezing",notes:"Consistent with seasonal allergies. Advised OTC antihistamine."}],
+          labs:[],
+          vitals:[{id:"vi2",date:"2026-05-20",bp:"118/76",hr:"68",temp:"98.1",rr:"14",spo2:"99",weight:"184",height:"70"}]
+        },
+        { id:"p3", name:"Priya Ramanathan", dob:"2001-02-18", sex:"Female", mrn:"00559", phone:"(555) 671-0094", bloodType:"B+",
+          allergies:[{id:"a2",substance:"Shellfish",severity:"Moderate",reaction:"Hives, swelling"},{id:"a3",substance:"Latex",severity:"Mild",reaction:"Contact rash"}],
+          problems:[], medications:[],
+          visits:[{id:"v4",date:"2026-07-01",type:"New patient",provider:"Dr. Osei",reason:"Establishing care",notes:"Healthy young adult. No active concerns. Discussed allergy history at length."}],
+          labs:[{id:"l3",date:"2026-07-01",test:"Complete Blood Count",result:"Normal",unit:"—",refRange:"—",flag:"Normal"}],
+          vitals:[{id:"vi3",date:"2026-07-01",bp:"110/70",hr:"64",temp:"98.6",rr:"15",spo2:"99",weight:"128",height:"64"}]
+        },
+        { id:"p4", name:"Harold Finch", dob:"1952-09-05", sex:"Male", mrn:"00201", phone:"(555) 903-4471", bloodType:"AB+",
+          allergies:[{id:"a4",substance:"Sulfa drugs",severity:"Severe",reaction:"Stevens-Johnson syndrome"}],
+          problems:["Coronary artery disease","Osteoarthritis","Chronic kidney disease, stage 2"],
+          medications:[
+            {id:"m4",name:"Atorvastatin",dosage:"40mg",frequency:"Once daily, evening",started:"2019-01-15",status:"Active"},
+            {id:"m5",name:"Aspirin",dosage:"81mg",frequency:"Once daily",started:"2019-01-15",status:"Active"},
+            {id:"m6",name:"Amlodipine",dosage:"5mg",frequency:"Once daily",started:"2021-11-02",status:"Active"}],
+          visits:[
+            {id:"v5",date:"2026-09-01",type:"Follow-up",provider:"Dr. Álvarez",reason:"Cardiology check-in",notes:"Stable. ECG unremarkable. Continue current medications."},
+            {id:"v6",date:"2026-04-18",type:"Follow-up",provider:"Dr. Álvarez",reason:"Kidney function monitoring",notes:"eGFR stable at 68. No dose adjustments needed."}],
+          labs:[
+            {id:"l4",date:"2026-09-01",test:"Creatinine",result:"1.2",unit:"mg/dL",refRange:"0.7–1.3",flag:"Normal"},
+            {id:"l5",date:"2026-09-01",test:"LDL Cholesterol",result:"142",unit:"mg/dL",refRange:"<100",flag:"High"}],
+          vitals:[{id:"vi4",date:"2026-09-01",bp:"134/88",hr:"72",temp:"98.2",rr:"16",spo2:"97",weight:"179",height:"69"}]
+        }
+      ];
+    }
+
+    async function loadPatients(){
+      try{
+        const result = await window.storage.get(STORAGE_KEY, false);
+        const parsed = result ? JSON.parse(result.value) : null;
+        if(parsed && Array.isArray(parsed) && parsed.length) return parsed;
+      }catch(e){}
+      const seed = seedPatients();
+      try{ await window.storage.set(STORAGE_KEY, JSON.stringify(seed), false); }catch(e){}
+      return seed;
+    }
+
+    async function savePatients(patients){
+      try{ const r = await window.storage.set(STORAGE_KEY, JSON.stringify(patients), false); return !!r; }
+      catch(e){ return false; }
+    }
+
+    function ageOf(dob){
+      const b=new Date(dob), t=new Date();
+      let a=t.getFullYear()-b.getFullYear();
+      const m=t.getMonth()-b.getMonth();
+      if(m<0||(m===0&&t.getDate()<b.getDate())) a--;
+      return a;
+    }
+    function formatDate(d){
+      return new Date(d+"T00:00:00").toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"});
+    }
+    function initialsOf(name){
+      return name.split(" ").map(p=>p[0]).slice(0,2).join("").toUpperCase();
+    }
+    function uid(prefix){ return prefix+"_"+Math.random().toString(36).slice(2,9); }
+    function esc(str){
+      return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+    function qs(name){
+      return new URLSearchParams(window.location.search).get(name);
+    }
+
+    let allPatients = [];
+
+    function renderList(items){
+      const el = document.getElementById('listContainer');
+      if(items.length === 0){
+        el.innerHTML = '<div class="empty">No patients match your search.</div>';
+        return;
+      }
+      el.innerHTML = items.map(p => {
+        const critical = p.allergies.some(a => a.severity === 'Severe');
+        return `
+          <a class="row patient-link" href="patient-detail.html?id=${encodeURIComponent(p.id)}">
+            <div class="avatar">${esc(initialsOf(p.name))}</div>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="font-size:14px;font-weight:500;">${esc(p.name)}</span>
+                ${critical ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A23B2E" stroke-width="2.5"><path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>' : ''}
+              </div>
+              <div class="mono" style="font-size:11.5px;color:var(--faint);">MRN ${esc(p.mrn)} · ${ageOf(p.dob)} yr · ${esc(p.sex)}</div>
+            </div>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C7C1B2" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </a>`;
+      }).join('');
+    }
+
+    function applySearch(){
+      const q = document.getElementById('searchBox').value.toLowerCase();
+      const filtered = allPatients.filter(p => p.name.toLowerCase().includes(q) || p.mrn.includes(q));
+      renderList(filtered);
+    }
+
+    (async function init(){
+      allPatients = await loadPatients();
+      renderList(allPatients);
+      document.getElementById('searchBox').addEventListener('input', applySearch);
+    })();
+  </script>
+</body>
+</html>
